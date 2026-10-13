@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>FLAMO — Autonomous AI Operations Agent</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+  <div class="app-layout">
+    <!-- Header -->
+    <header class="top-nav">
+      <div class="brand-group">
+        <div class="logo-badge">
+          <span class="flame-icon">🔥</span>
+        </div>
+        <div>
+          <div class="brand-title">FLAMO</div>
+          <div class="brand-subtitle">Autonomous AI Operations Agent • Multi-Agent Platform</div>
+        </div>
+      </div>
+      <div class="system-status">
+        <div class="status-indicator live-pulse"></div>
+        <span id="systemStatusText">Engine: Live</span>
+        <span class="model-badge" id="modelBadge">gemini-3.5-flash-lite</span>
+        <span class="agent-badge">Hierarchical Swarm</span>
+      </div>
+    </header>
+
+    <!-- Main Workspace -->
+    <main class="main-container">
+      <!-- Input Console -->
+      <section class="console-card">
+        <div class="console-header">
+          <span class="console-label">MISSION OBJECTIVE</span>
+          <span class="console-hint">Provide a high-level goal. Flamo will autonomously decompose, dispatch specialist sub-agents, verify claims, and recover.</span>
+        </div>
+        <div class="input-row">
+          <input 
+            type="text" 
+            id="taskGoalInput" 
+            placeholder="e.g. Research the top AI agent frameworks and compare architecture, persistence, tools, and GitHub activity" 
+            autocomplete="off"
+          />
+          <button id="submitTaskBtn" class="btn-deploy">
+            <span class="btn-icon">⚡</span> Deploy Agent
+          </button>
+          <button id="cancelTaskBtn" class="btn-cancel" style="display: none;">
+            Cancel
+          </button>
+        </div>
+
+        <!-- Presets -->
+        <div class="prompt-presets">
+          <span class="presets-title">PORTFOLIO DEMOS & BENCHMARKS:</span>
+          <button class="preset-chip" data-query="Research the top 5 AI agent frameworks and compare architecture, capabilities, persistence, tool support, and documentation. Detect conflicting claims, verify facts, save a report to the workspace, and provide evidence.">🏆 Top 5 Agent Frameworks (Full Demo)</button>
+          <button class="preset-chip" data-query="Calculate 125 * 48.">🧮 125 * 48</button>
+          <button class="preset-chip" data-query="Calculate 125 multiplied by 48, then divide the result by 5.">➗ Multi-Step Math (125 * 48 / 5)</button>
+          <button class="preset-chip" data-query="Research what LangGraph is and summarize its core stateful workflow features in 2 sentences.">🌐 Research LangGraph</button>
+          <button class="preset-chip" data-query="Use the calculator to divide 100 by 0. If it fails, explain why dividing by zero is undefined.">⚠️ Zero Division Recovery</button>
+          <button class="preset-chip" data-query="Use the browser tool to navigate to https://example.com, extract page text, and capture a screenshot.">🌐 Playwright Browser Navigation</button>
+        </div>
+      </section>
+
+      <!-- HITL Approval Checkpoint Banner -->
+      <section id="hitlApprovalCard" class="hitl-card" style="display: none;">
+        <div class="hitl-header">
+          <span class="hitl-icon">🛡️</span>
+          <div>
+            <div class="hitl-title">ACTION REQUIRES OPERATOR AUTHORIZATION</div>
+            <div id="hitlActionDesc" class="hitl-desc">The agent has paused at a sensitive operational checkpoint.</div>
+          </div>
+        </div>
+        <div class="hitl-actions">
+          <button id="hitlApproveBtn" class="btn-approve">✓ Authorize Action</button>
+          <button id="hitlRejectBtn" class="btn-reject">✕ Decline Action</button>
+        </div>
+      </section>
+
+      <!-- Active Mission Dashboard -->
+      <div id="missionDashboard" class="mission-dashboard" style="display: none;">
+        
+        <!-- Metrics Bar -->
+        <div class="metrics-grid">
+          <div class="metric-card">
+            <div class="metric-label">STATUS</div>
+            <div id="statusBadge" class="status-pill status-pending">PENDING</div>
+          </div>
+          <div class="metric-label-card">
+            <div class="metric-label">RUNTIME</div>
+            <div id="runtimeCounter" class="metric-value font-mono">0.0s</div>
+          </div>
+          <div class="metric-label-card">
+            <div class="metric-label">ACTIVE SPECIALIST</div>
+            <div id="activeAgentBadge" class="metric-value-text highlight-agent">Supervisor</div>
+          </div>
+          <div class="metric-label-card">
+            <div class="metric-label">LLM CALLS</div>
+            <div id="llmCallsCount" class="metric-value font-mono">0</div>
+          </div>
+          <div class="metric-label-card">
+            <div class="metric-label">TOOL CALLS</div>
+            <div id="toolCount" class="metric-value font-mono">0</div>
+          </div>
+          <div class="metric-label-card">
+            <div class="metric-label">EVIDENCE COUNT</div>
+            <div id="evidenceCountBadge" class="metric-value font-mono">0</div>
+          </div>
+          <div class="metric-label-card">
+            <div class="metric-label">TOKEN USAGE</div>
+            <div id="tokenUsageBadge" class="metric-value-text font-mono">Not reported by provider</div>
+          </div>
+          <div class="metric-label-card">
+            <div class="metric-label">EST. COST</div>
+            <div id="costBadge" class="metric-value-text font-mono">Not reported by provider</div>
+          </div>
+        </div>
+
+        <!-- 2-Column Split: Left (Plan + Evidence + Verification) / Right (Tools + Final Result) -->
+        <div class="dashboard-split">
+          
+          <!-- Column Left -->
+          <div class="col-left">
+            <!-- Execution Plan -->
+            <div class="panel-card">
+              <div class="panel-header">
+                <h3>📋 Autonomous Execution Plan</h3>
+                <span id="planComplexity" class="tag-badge">Complexity: —</span>
+              </div>
+              <div id="planList" class="plan-list">
+                <div class="empty-state">Synthesizing execution plan...</div>
+              </div>
+            </div>
+
+            <!-- Evidence & Claims Card -->
+            <div class="panel-card">
+              <div class="panel-header">
+                <h3>🔍 Evidence & Verified Claims</h3>
+                <span id="evidenceStatusBadge" class="tag-badge">No Claims</span>
+              </div>
+              <div id="claimsBody" class="claims-body">
+                <div class="empty-state">Evidence extraction will run following research and tool observations.</div>
+              </div>
+            </div>
+
+            <!-- Verification Card -->
+            <div class="panel-card">
+              <div class="panel-header">
+                <h3>🛡️ Verification & Soundness</h3>
+                <span id="verificationStatusBadge" class="tag-badge">Pending</span>
+              </div>
+              <div id="verificationBody" class="verification-body">
+                <div class="empty-state">Verification will trigger automatically upon execution completion.</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Column Right -->
+          <div class="col-right">
+            <!-- Tool Activity Feed -->
+            <div class="panel-card">
+              <div class="panel-header">
+                <h3>⚙️ Tool Activity & Observations</h3>
+                <span id="toolCallsBadge" class="tag-badge">0 Executions</span>
+              </div>
+              <div id="toolActivityList" class="tool-activity-list">
+                <div class="empty-state">No tools invoked yet.</div>
+              </div>
+            </div>
+
+            <!-- Final Response Card -->
+            <div class="panel-card final-answer-panel">
+              <div class="panel-header">
+                <h3>🎯 Final Verified Result</h3>
+                <button id="copyResultBtn" class="btn-sm" title="Copy to clipboard">📋 Copy</button>
+              </div>
+              <div id="finalAnswerContent" class="final-answer-content">
+                <div class="empty-state pulse-text">Agent reasoning in progress...</div>
+              </div>
+            </div>
+
+          </div>
+        </div>
+
+        <!-- Timeline Trace Drawer -->
+        <div class="panel-card trace-panel">
+          <div class="panel-header">
+            <h3>⏱️ Live Execution Stream & Tree (<span id="traceEventsCount">0</span> events)</h3>
+            <button id="toggleTraceBtn" class="btn-sm">Expand Trace Details</button>
+          </div>
+          <div id="traceEventsList" class="trace-timeline-collapsed">
+            <!-- Populated via JS -->
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Past Tasks History Drawer -->
+      <section class="panel-card history-panel">
+        <div class="panel-header">
+          <h3>🕒 Recent Missions</h3>
+          <button id="refreshTasksBtn" class="btn-sm">↻ Refresh</button>
+        </div>
+        <div id="pastTasksList" class="history-list">
+          <!-- Populated via JS -->
+        </div>
+      </section>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer">
+      <span>FLAMO Agentic System • LangGraph Multi-Agent Orchestration • Gemini Flash • Sandboxed Execution</span>
+    </footer>
+  </div>
+
+  <script src="/static/app.js"></script>
+</body>
+</html>

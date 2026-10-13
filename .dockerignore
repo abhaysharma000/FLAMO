@@ -1,0 +1,45 @@
+# Development environments and Git
+.git
+.gitignore
+.venv
+venv
+env
+
+# Local environment secrets and credentials (CRITICAL)
+.env
+.env.*
+*.pem
+*.key
+
+# Python bytecode and testing caches
+__pycache__
+*.py[cod]
+*$py.class
+.pytest_cache
+.coverage
+htmlcov
+
+# Node and Vite development caches
+frontend/node_modules
+frontend/.vite
+
+# Local SQLite databases and persistent state
+flamo.db
+flamo.db-journal
+flamo.db-wal
+flamo.db-shm
+*.sqlite
+*.sqlite3
+
+# Local runtime workspace reports and persistent backups
+workspace/
+backups/
+data/
+chroma_db/
+chroma_db_*/
+
+# Temporary files and logs
+*.log
+*.tmp
+.DS_Store
+Thumbs.db

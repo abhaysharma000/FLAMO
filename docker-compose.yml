@@ -1,0 +1,65 @@
+services:
+  flamo:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: flamo:latest
+    container_name: flamo-agent
+    ports:
+      - target: 8000
+        published: "${FLAMO_PORT:-8000}"
+        host_ip: 127.0.0.1
+        protocol: tcp
+    environment:
+      # --- LLM Engine Configuration ---
+      - GEMINI_API_KEY=${GEMINI_API_KEY}
+      - GEMINI_MODEL=${GEMINI_MODEL:-gemini-3.5-flash-lite}
+      
+      # --- Memory & Storage Backend ---
+      - MEMORY_BACKEND=${MEMORY_BACKEND:-sqlite}
+      - EMBEDDING_MODEL=${EMBEDDING_MODEL:-gemini-embedding-001}
+      - DATABASE_URL=sqlite:////app/data/flamo.db
+      - WORKSPACE_DIR=/app/workspace
+      - CHROMA_PERSIST_DIRECTORY=/app/data/chroma_db
+      
+      # --- Single-Operator Authentication & Security ---
+      - AUTH_ENABLED=${AUTH_ENABLED:-true}
+      - OPERATOR_USERNAME=${OPERATOR_USERNAME:-admin}
+      - OPERATOR_PASSWORD_HASH=${OPERATOR_PASSWORD_HASH:-}
+      - OPERATOR_PASSWORD=${OPERATOR_PASSWORD:-}
+      - SECRET_KEY=${SECRET_KEY:-}
+      - SESSION_EXPIRE_MINUTES=${SESSION_EXPIRE_MINUTES:-480}
+      - COOKIE_SECURE=${COOKIE_SECURE:-false}
+      - COOKIE_SAMESITE=${COOKIE_SAMESITE:-lax}
+      - CORS_ALLOWED_ORIGINS=${CORS_ALLOWED_ORIGINS:-}
+      
+      # --- Observability ---
+      - LOG_LEVEL=${LOG_LEVEL:-INFO}
+    volumes:
+      # Persistent named volumes guaranteeing data survives container recreation
+      - flamo-data:/app/data
+      - flamo-workspace:/app/workspace
+      - flamo-backups:/app/backups
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/api/health/live"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 15s
+    stop_grace_period: 15s
+    restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          cpus: "2.0"
+          memory: 1024M
+        reservations:
+          memory: 256M
+
+volumes:
+  flamo-data:
+    name: flamo_persistent_data
+  flamo-workspace:
+    name: flamo_persistent_workspace
+  flamo-backups:
+    name: flamo_persistent_backups

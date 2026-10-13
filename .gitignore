@@ -1,0 +1,39 @@
+.venv/
+__pycache__/
+*.pyc
+.env
+.pytest_cache/
+.vscode/
+*.db
+*.sqlite3
+workspace/temp/
+*.log
+backups/
+data/
+chroma_db/
+frontend/dist/# Secrets and environment files
+.env
+.env.*
+!.env.example
+
+# Python
+.venv/
+__pycache__/
+**/__pycache__/
+*.py[cod]
+.pytest_cache/
+
+# Frontend dependencies and build output
+frontend/node_modules/
+frontend/dist/
+frontend/coverage/
+
+# Generated data and local artifacts
+workspace/
+scratch/
+*.db
+*.sqlite
+*.sqlite3
+*.bak
+*.log
+/evaluation_report.json
